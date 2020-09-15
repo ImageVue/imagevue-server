@@ -29,22 +29,23 @@ def get_session(sid, lock=True):
         sessions[sid] = {}
     
     class _session_context_manager(object):
-        def __init__(self, sid):
+        def __init__(self, sid, lock):
             self.sid = sid
             self.session = sessions[sid]
+            self.lock = lock
         
         def __enter__(self):
             while(sid in locked_sessions):
                 time.sleep(0.001)
-            if(lock):
+            if(self.lock):
                 locked_sessions.append(sid)
             return self.session
 
         def __exit__(self, type, value, traceback):
-            if(lock):
+            if(self.lock):
                 del locked_sessions[locked_sessions.index(sid)]
     
-    return _session_context_manager(sid)
+    return _session_context_manager(sid, lock)
 
 
 
@@ -63,6 +64,8 @@ def open_xfel_run(data):
         session['proposal'] = data['proposal']
         session['run_number'] = data['run']
         session['run'] = open_run(proposal=data['proposal'], run=data['run'])
+
+    print("run opened succesfully")
 
     return list(session['run'].instrument_sources)
 
