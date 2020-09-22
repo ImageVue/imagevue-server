@@ -80,7 +80,6 @@ def keys_for_source(source):
     with get_session(request.sid) as session:
         return list(session['run'].keys_for_source(source))
 
-
 @sio.on('read_data')
 def read_data(data):
     with get_session(request.sid) as session:
@@ -95,7 +94,10 @@ def train_ids(source):
 @sio.on('get_frame')
 def get_frame(index):
     with get_session(request.sid, lock=False) as session:
-        return convert_array_to_bytes(session['data'][index])
+        if( len(session['data'][index].shape) == 2):
+            return convert_array_to_bytes(session['data'][index])
+        else:
+            return convert_array_to_bytes(session['data'][index][0])
 
 
 def convert_array_to_bytes(numpy_array):
