@@ -11,8 +11,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 sio = SocketIO(app, cors_allowed_origins="*")
 
-
-
 ####################
 # Session Handling:
 # we currently lock the session when one event is e.g. reading from disk
@@ -47,6 +45,9 @@ def get_session(sid, lock=True):
     
     return _session_context_manager(sid, lock)
 
+
+
+import imagevue.streak
 
 
 @sio.on('connect')
@@ -94,7 +95,7 @@ def train_ids(source):
 @sio.on('get_frame')
 def get_frame(index):
     with get_session(request.sid, lock=False) as session:
-        if( len(session['data'][index].shape) == 2):
+        if(len(session['data'][index].shape) == 2):
             return convert_array_to_bytes(session['data'][index])
         else:
             return convert_array_to_bytes(session['data'][index][0])
